@@ -5,7 +5,9 @@ import './css/side-menu.css'
 class App extends Component {
   constructor(){
     super();
-    this.state = {lista: [{nome: 'alberto', email: 'albreto.souza@aceloum.com.br', senha: '123456'}]};
+    this.state = {
+      lista: []
+    };
   }
 
   render() {
