@@ -6,8 +6,53 @@ class App extends Component {
   constructor(){
     super();
     this.state = {
-      lista: []
+      lista: [],
+      nome: '',
+      email: '',
+      senha: ''
     };
+    this.enviaForm = this.enviaForm.bind(this);
+  }
+
+  componentDidMount(){
+    // fetch('http://cdc-react.herokuapp.com/api/autores')
+    // .then(res => res.json())
+    // .then(result => {
+    //   let arrResult = [];
+    //   let index = parseInt(result.length) - 1;
+    //   arrResult.push(result[0]);
+    //   arrResult.push(result[1]);
+    //   arrResult.push(result[3]);
+    //   arrResult.push(result[index]);
+    //   this.setState({lista:arrResult})
+    // }).catch(err => console.log(err));
+
+    fetch('http://localhost:8080/api/autores')
+    .then(res => res.json())
+    .then(result => {
+      console.log(result);
+      this.setState({lista:result});
+    }).catch(err => console.log(err));
+  }
+
+  enviaForm(evento){
+    evento.preventDefault();
+
+    fetch('http://localhost:8080/api/autores', {
+      headers:{'Content-type': 'application/json'},
+      method: 'post',
+      body: JSON.stringify({nome:this.state.nome, email:this.state.email, senha:this.state.senha})
+    }).then(res => {
+      console.log(res.status);
+      console.log(res.statusText);
+    });
+
+    // fetch('http://cdc-react.herokuapp.com/api/autores', {
+    //   headers:{'Content-type': 'application/json'},
+    //   method: 'post',
+    //   body: JSON.stringify({nome:'beurismar', email:'beurismar@olenhador.com', senha:'123456'})
+    // }).then(res => console.log(res))
+    // .catch(err => console.log(err));
   }
 
   render() {
@@ -35,7 +80,7 @@ class App extends Component {
             </div>
             <div className="content" id="content">
               <div className="pure-form pure-form-aligned">
-                <form className="pure-form pure-form-aligned">
+                <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
                   <div className="pure-control-group">
                     <label htmlFor="nome">Nome</label>
                     <input id="nome" type="text" name="nome" value=""  />
@@ -67,7 +112,7 @@ class App extends Component {
                     {
                       this.state.lista.map(function(autor) {
                         return (
-                          <tr>
+                          <tr key={autor.id}>
                             <td>{autor.nome}</td>
                             <td>{autor.email}</td>
                           </tr>
