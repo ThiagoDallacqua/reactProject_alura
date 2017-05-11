@@ -1,88 +1,9 @@
 import React, { Component } from 'react';
-import InputCustomizado from './componentes/InputCustomizado.js';
+import AutorBox from './Autor.js';
 import './css/pure-min.css';
 import './css/side-menu.css'
 
 class App extends Component {
-  constructor(){
-    super();
-    this.state = {
-      lista: [],
-      nome: '',
-      email: '',
-      senha: ''
-    };
-    this.enviaForm = this.enviaForm.bind(this);
-    this.setNome = this.setNome.bind(this);
-    this.setEmail = this.setEmail.bind(this);
-    this.setSenha = this.setSenha.bind(this);
-  }
-
-  componentDidMount(){
-    // fetch('http://cdc-react.herokuapp.com/api/autores')
-    // .then(res => res.json())
-    // .then(result => {
-    //   let arrResult = [];
-    //   let index = parseInt(result.length) - 1;
-    //   arrResult.push(result[0]);
-    //   arrResult.push(result[1]);
-    //   arrResult.push(result[3]);
-    //   arrResult.push(result[index]);
-    //   this.setState({lista:arrResult})
-    // }).catch(err => console.log(err));
-
-    fetch('http://localhost:8080/api/autores')
-    .then(res => res.json())
-    .then(result => {
-      console.log(result);
-      this.setState({lista:result});
-    }).catch(err => console.log(err));
-  }
-
-  enviaForm(evento){
-    evento.preventDefault();
-
-    fetch('http://localhost:8080/api/autores', {
-      headers:{'Content-type': 'application/json'},
-      method: 'post',
-      body: JSON.stringify({nome:this.state.nome, email:this.state.email, senha:this.state.senha})
-    }).then(res => {
-      console.log(res.status);
-      console.log(res.statusText);
-      res.json()
-      .then(result => {
-        console.log(result);
-        this.setState({lista:result});
-      }).catch(err => console.log(err));
-    });
-
-    // fetch('http://cdc-react.herokuapp.com/api/autores', {
-    //   headers:{'Content-type': 'application/json'},
-    //   method: 'post',
-    //   body: JSON.stringify({nome:this.state.nome, email:this.state.email, senha:this.state.senha})
-    // }).then(res => {
-    //   console.log(res.status);
-    //   console.log(res.statusText);
-    //   res.json()
-    //   .then(result => {
-    //     console.log(result);
-    //     this.setState({lista:result});
-    //   }).catch(err => console.log(err));
-    // });
-  }
-
-  setNome(evento){
-    this.setState({nome: evento.target.value});
-  }
-
-  setEmail(evento){
-    this.setState({email: evento.target.value});
-  }
-
-  setSenha(evento){
-    this.setState({senha: evento.target.value});
-  }
-
   render() {
     return (
       <div id="layout">
@@ -107,40 +28,7 @@ class App extends Component {
               <h1>Cadastro de Autores</h1>
             </div>
             <div className="content" id="content">
-              <div className="pure-form pure-form-aligned">
-                <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
-                    <InputCustomizado id="nome" type="text" name="nome" value={this.state.nome} onChange={this.setNome} label="Nome"/>
-                    <InputCustomizado id="email" type="email" name="email" value={this.state.emial} onChange={this.setEmail} label="Email"/>
-                    <InputCustomizado id="senha" type="password" name="senha" value={this.state.senha} onChange={this.setSenha} label="Senha"/>
-                  <div className="pure-control-group">
-                    <label></label>
-                    <button type="submit" className="pure-button pure-button-primary">Gravar</button>
-                  </div>
-                </form>
-
-              </div>
-              <div>
-                <table className="pure-table">
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>email</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {
-                      this.state.lista.map(function(autor) {
-                        return (
-                          <tr key={autor.id}>
-                            <td>{autor.nome}</td>
-                            <td>{autor.email}</td>
-                          </tr>
-                        );
-                      })
-                    }
-                  </tbody>
-                </table>
-              </div>
+              <AutorBox/>
             </div>
           </div>
       </div>
