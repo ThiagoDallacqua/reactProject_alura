@@ -3,27 +3,27 @@ import InputCustomizado from './componentes/InputCustomizado.js';
 import PubSub from 'pubsub-js';
 import TratadorErros from './TratadorErros.js';
 
-class FormularioAutor extends Component {
+class FormularioLivro extends Component {
   constructor(){
     super();
     this.state = {
-      nome: '',
-      email: '',
-      senha: ''
+      titulo: '',
+      preco: '',
+      autorId: ''
     };
     this.enviaForm = this.enviaForm.bind(this);
-    this.setNome = this.setNome.bind(this);
-    this.setEmail = this.setEmail.bind(this);
-    this.setSenha = this.setSenha.bind(this);
+    this.setTitulo = this.setTitulo.bind(this);
+    this.setPreco = this.setPreco.bind(this);
+    this.setAutorId = this.setAutorId.bind(this);
   }
 
   enviaForm(evento){
     evento.preventDefault();
 
-    fetch('http://localhost:8080/api/autores', {
+    fetch('http://localhost:8080/api/livros', {
       headers:{'Content-type': 'application/json'},
       method: 'post',
-      body: JSON.stringify({nome:this.state.nome, email:this.state.email, senha:this.state.senha})
+      body: JSON.stringify({titulo:this.state.titulo, preco:this.state.preco, autorId:this.state.autorId})
     }).then(res => {
       PubSub.publish("limpa-erros", {});
 
@@ -33,7 +33,8 @@ class FormularioAutor extends Component {
 
         res.json()
         .then(err => {
-          err.errors.forEach((erro) => console.log(`o campo ${erro.field} não pode estar vazio.`));
+          // err.errors.forEach((erro) => console.log(`o campo ${erro.field} não pode estar vazio.`));
+          console.log(err);
 
           new TratadorErros().publicaErros(err);
         }).catch(err => console.log(err));
@@ -41,11 +42,11 @@ class FormularioAutor extends Component {
         res.json()
         .then(novaListagem => {
           console.log(novaListagem);
-          PubSub.publish('atualiza-lista-autores', novaListagem);
+          PubSub.publish('atualiza-lista-livros', novaListagem);
           this.setState({
-            nome: '',
-            email: '',
-            senha: ''
+            titulo: '',
+            preco: '',
+            autorId: ''
           });
         }).catch(err => console.log(err));
       }
@@ -66,30 +67,40 @@ class FormularioAutor extends Component {
     // });
   }
 
-  setNome(evento){
-    this.setState({nome: evento.target.value});
+  setTitulo(evento){
+    this.setState({titulo: evento.target.value});
   }
 
-  setEmail(evento){
-    this.setState({email: evento.target.value});
+  setPreco(evento){
+    this.setState({preco: evento.target.value});
   }
 
-  setSenha(evento){
-    this.setState({senha: evento.target.value});
+  setAutorId(evento){
+    this.setState({autorId: evento.target.value});
   }
 
   render() {
     return (
       <div>
         <div className="header">
-          <h1>Cadastro de Autores</h1>
+          <h1>Cadastro de Livros</h1>
         </div>
         <div className="content" id="content">
           <div className="pure-form pure-form-aligned">
             <form className="pure-form pure-form-aligned" onSubmit={this.enviaForm} method="post">
-              <InputCustomizado id="nome" type="text" name="nome" value={this.state.nome} onChange={this.setNome} label="Nome"/>
-              <InputCustomizado id="email" type="email" name="email" value={this.state.email} onChange={this.setEmail} label="Email"/>
-              <InputCustomizado id="senha" type="password" name="senha" value={this.state.senha} onChange={this.setSenha} label="Senha"/>
+              <InputCustomizado id="titulo" type="text" name="titulo" value={this.state.titulo} onChange={this.setTitulo} label="Título do Livro"/>
+              <InputCustomizado id="preco" type="text" name="preco" value={this.state.preco} onChange={this.setPreco} label="Preço"/>
+              <div className="pure-control-group">
+              <label htmlFor="autorId">AutorId</label>
+                <select value={this.state.autorId} id="autorId" name="autorId" onChange={this.setAutorId}>
+                  <option value="">Selecione o Autor</option>
+                  {
+                    this.props.autores.map(autor => {
+                      return <option key={autor.id} value={autor.id}>{autor.nome}</option>
+                    })
+                  }
+                </select>
+              </div>
               <div className="pure-control-group">
                 <label></label>
                 <button type="submit" className="pure-button pure-button-primary">Gravar</button>
@@ -102,24 +113,26 @@ class FormularioAutor extends Component {
   }
 }
 
-class TabelaAutores extends Component {
+class TabelaLivros extends Component {
   render() {
     return (
       <div>
         <table className="pure-table">
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>email</th>
+              <th>Título</th>
+              <th>Preço</th>
+              <th>Autor</th>
             </tr>
           </thead>
           <tbody>
             {
-              this.props.lista.map(function(autor) {
+              this.props.lista.map(function(livro) {
                 return (
-                  <tr key={autor.id}>
-                    <td>{autor.nome}</td>
-                    <td>{autor.email}</td>
+                  <tr key={livro.id}>
+                    <td>{livro.titulo}</td>
+                    <td>{livro.preco}</td>
+                    <td>{livro.autor.nome}</td>
                   </tr>
                 );
               })
@@ -131,11 +144,12 @@ class TabelaAutores extends Component {
   }
 }
 
-export default class AutorBox extends Component {
+export default class LivroBox extends Component {
   constructor(){
     super();
     this.state = {
-      lista: []
+      lista: [],
+      autores: []
     };
   }
 
@@ -152,21 +166,28 @@ export default class AutorBox extends Component {
     //   this.setState({lista:arrResult})
     // }).catch(err => console.log(err));
 
-    fetch('http://localhost:8080/api/autores')
+    fetch('http://localhost:8080/api/livros')
     .then(res => res.json())
     .then(result => {
-      console.log(result);
       this.setState({lista:result});
     }).catch(err => console.log(err));
 
-    PubSub.subscribe('atualiza-lista-autores', (topico, novaLista) => this.setState({lista: novaLista}));
+    PubSub.subscribe('atualiza-lista-livros', (topico, novaLista) => {
+      this.setState({lista: novaLista});
+  });
+
+    fetch('http://localhost:8080/api/autores')
+    .then(res => res.json())
+    .then(result => {
+      this.setState({autores:result});
+    }).catch(err => console.log(err));
   }
 
   render(){
     return (
       <div>
-        <FormularioAutor/>
-        <TabelaAutores lista={this.state.lista}/>
+        <FormularioLivro autores={this.state.autores}/>
+        <TabelaLivros lista={this.state.lista}/>
       </div>
     );
   }
